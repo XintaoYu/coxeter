@@ -104,6 +104,7 @@ lemma chain_nodup {L : List P} (h : chain L) : L.Nodup := by
         apply List.Chain'.tail h
       exact hl' this
 
+
 -- May not be needed, use chain_nodup
 lemma chain_singleton_of_head_eq_tail  {L : List P} (a : P) (chain_l : chain L)
  (lha : L.head? = some a) (lta :  L.getLast? = some a) : L.length = 1  := by

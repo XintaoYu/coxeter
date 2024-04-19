@@ -22,21 +22,6 @@ Note that each element in Delta(P) will considered as a chain.
 @[simp]
 def Delta_List (P : Type*) [PartialOrder P] : Set (List P) := {L : List P | chain L}
 
-def Finset.toList' (F : Finset P) (h : IsTrichotomous F (· < ·) ) : List P :=
-  List.insertionSort (· < ·) (F.toList)
-
-lemma aux {L : List P} (h : chain L) : IsTrichotomous L.toFinset (· < ·) := by
-  sorry
-
-lemma aux1 {L : List P} (h : chain L) : Finset.toList' L.toFinset (aux h) = L := by
-  sorry
-
-lemma aux2 {F₁ F₂ : Finset P} (h : IsTrichotomous F₂ (· < ·)) (hs : F₁ ⊆ F₂) : IsTrichotomous F₁ (· < ·) := sorry
-
-
-lemma aux3 {F : Finset P} (h : IsTrichotomous F (· < ·)) : chain (Finset.toList' F h) := sorry
-
-lemma aux4 {F : Finset P} (h : IsTrichotomous F (· < ·)) : List.toFinset (Finset.toList' F h) = F := sorry
 /-
 Definition: Let P be a poset. Delta P is the set of all chains in P, which is an abstract simplicial complex.
 Note that each element in Delta (P) will considered as a subset of P.
@@ -52,25 +37,51 @@ abbrev Delta (P : Type*) [PartialOrder P] : AbstractSimplicialComplex P where
     simp only [Delta_List, Set.mem_image, Set.mem_setOf_eq]
     simp at ain
     rcases ain with ⟨al, chain_a, ha⟩
-    have := aux chain_a
-    subst ha
-    have := aux2 this blea
-    use (Finset.toList' b this)
+    use List.filter (· ∈ b) al
     constructor
-    · simp [aux3]
-    · simp [aux4]
+    · simp [chain]
+      refine List.Chain'.sublist chain_a ?_
+      simp only [List.filter_sublist]
+    · simp
+      ext x
+      simp only [Finset.mem_filter, List.mem_toFinset, and_iff_right_iff_imp]
+      intro xb
+      convert (blea xb)
+      rw [ha.symm]
+      simp only [List.mem_toFinset]
 
 
+lemma List.sub_toFinset_of_sublist {L₁ L₂ : List P} : L₂.Sublist L₁ → L₂.toFinset ⊆ L₁.toFinset := by
+  intro sublst
+  intro x hx
+  simp at hx
+  have := List.Sublist.subset sublst
+  have : x ∈ L₁ := this hx
+  simp [this]
 
 /-
 Definition: Let P be a graded poset. Then Delta.ASC (P) is a pure abstract simplicial complex.
 -/
 instance Delta.Pure {P : Type*} [PartialOrder P] [Fintype P] [GradedPoset P]: Pure (Delta P) where
   pure := by
-    intro s sin t tin
+    rintro s ⟨hs₁, hs₂⟩ t ⟨ht₁, ht₂⟩
     have := GradedPoset.pure (P := P)
-    simp only [Facets, IsFacet] at *
-    sorry
+    simp [Facets, IsFacet, Delta, mem_faces.symm] at *
+    rcases hs₁ with ⟨L₁, chain_l₁, seq⟩
+    rcases ht₁ with ⟨L₂, chain_l₂, teq⟩
+    subst seq teq
+    rw [List.toFinset_card_of_nodup (chain_nodup chain_l₁), List.toFinset_card_of_nodup (chain_nodup chain_l₂)]
+    refine this _ _ chain_l₁ ?_ chain_l₂ ?_
+    · intro L' chain_l' sublst
+      apply List.Sublist.eq_of_length sublst
+      rw [← List.toFinset_card_of_nodup (chain_nodup chain_l₁), ← List.toFinset_card_of_nodup (chain_nodup chain_l')]
+      have := hs₂ L' chain_l' (List.sub_toFinset_of_sublist sublst)
+      simp [this]
+    · intro L' chain_l' sublst
+      apply List.Sublist.eq_of_length sublst
+      rw [← List.toFinset_card_of_nodup (chain_nodup chain_l₂), ← List.toFinset_card_of_nodup (chain_nodup chain_l')]
+      have := ht₂ L' chain_l' (List.sub_toFinset_of_sublist sublst)
+      simp [this]
 
 
 
