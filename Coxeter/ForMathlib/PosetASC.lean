@@ -28,15 +28,43 @@ def Finset.toList' (F : Finset P) (h : IsTrichotomous F (· < ·) ) : List P :=
 lemma aux {L : List P} (h : chain L) : IsTrichotomous L.toFinset (· < ·) := by
   sorry
 
+lemma head_sort_of_tail (S : Finset P) (head : P) (g : ∀ s: S, head < s): List.insertionSort (· < ·) (Finset.toList (insert head (S : Finset P))) = head :: (List.insertionSort (· < ·) S.toList) := sorry
+
 lemma aux1 {L : List P} (h : chain L) : Finset.toList' L.toFinset (aux h) = L := by
-  sorry
+  rw [Finset.toList']
+  induction L with
+  | nil => simp
+  | cons head tail ih =>
+    simp [List.insertionSort_cons_eq_take_drop (· < ·) head tail]
+    have g : ∀ s : tail.toFinset, head < s := by
+      simp
+      sorry
+    simp [head_sort_of_tail tail.toFinset head g]
+    have g₁ : chain tail := by
+      have g₂ : List.Chain' (· < ·) (head :: tail) := by exact h
+      have g₃ : List.Chain' (· < ·) (List.tail (head :: tail)) := by apply List.Chain'.tail g₂
+      have g₄ : tail = List.tail (head :: tail) := rfl
+      rw [g₄] at g₃
+      exact g₃
+    simp [g₁] at ih
+    exact ih
+    -- have g : List.insertionSort (· < ·) (Finset.toList (insert head (S : Finset))) ()
+
 
 lemma aux2 {F₁ F₂ : Finset P} (h : IsTrichotomous F₂ (· < ·)) (hs : F₁ ⊆ F₂) : IsTrichotomous F₁ (· < ·) := by
   constructor
   · intro a b
     let a' : {x // x ∈ F₂} := ⟨a.1, hs a.2⟩
     let b' : {x // x ∈ F₂} := ⟨b.1, hs b.2⟩
-    have := h.1
+    have := h.1 a' b'
+    rcases this with h' | h' | h'
+    · left; exact h'
+    · right; left; ext
+      calc
+        _ = a'.1 := rfl
+        _ = b'.1 := by exact congrArg Subtype.val h'
+        _ = b.1 := rfl
+    · right; right; exact h'
 
 
 lemma aux3 {F : Finset P} (h : IsTrichotomous F (· < ·)) : chain (Finset.toList' F h) := sorry
