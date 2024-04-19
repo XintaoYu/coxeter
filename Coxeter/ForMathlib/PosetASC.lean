@@ -31,7 +31,12 @@ lemma aux {L : List P} (h : chain L) : IsTrichotomous L.toFinset (· < ·) := by
 lemma aux1 {L : List P} (h : chain L) : Finset.toList' L.toFinset (aux h) = L := by
   sorry
 
-lemma aux2 {F₁ F₂ : Finset P} (h : IsTrichotomous F₂ (· < ·)) (hs : F₁ ⊆ F₂) : IsTrichotomous F₁ (· < ·) := sorry
+lemma aux2 {F₁ F₂ : Finset P} (h : IsTrichotomous F₂ (· < ·)) (hs : F₁ ⊆ F₂) : IsTrichotomous F₁ (· < ·) := by
+  constructor
+  · intro a b
+    let a' : {x // x ∈ F₂} := ⟨a.1, hs a.2⟩
+    let b' : {x // x ∈ F₂} := ⟨b.1, hs b.2⟩
+    have := h.1
 
 
 lemma aux3 {F : Finset P} (h : IsTrichotomous F (· < ·)) : chain (Finset.toList' F h) := sorry
