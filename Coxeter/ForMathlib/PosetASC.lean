@@ -30,7 +30,22 @@ abbrev Delta (P : Type*) [PartialOrder P] : AbstractSimplicialComplex P where
   faces := List.toFinset '' Delta_List P
   empty_mem := by simp
   lower' := by
-    sorry
+    simp only [IsLowerSet]
+    intro a b blea ain
+    simp only [Delta_List, Set.mem_image, Set.mem_setOf_eq]
+    simp at ain
+    rcases ain with ⟨al, chain_a, ha⟩
+    use List.filter (· ∈ b) al
+    simp only [List.toFinset_filter, decide_eq_true_eq]
+    constructor
+    · simp [chain]
+      exact List.Chain'.sublist chain_a (List.filter_sublist al)
+    · rw [ha]
+      simp at blea
+      ext x
+      simp only [Finset.mem_filter, and_iff_right_iff_imp]
+      intro hb
+      exact blea hb
 
 
 lemma List.sub_toFinset_of_sublist {L₁ L₂ : List P} : L₂.Sublist L₁ → L₂.toFinset ⊆ L₁.toFinset := by
