@@ -3,11 +3,10 @@ import Mathlib.Data.List.Basic
 import Coxeter.ForMathlib.AbstractSimplicialComplex
 import Coxeter.ForMathlib.PosetChain
 import Coxeter.ForMathlib.PosetGraded
-
+import Mathlib.Data.Finset.Sort
 
 noncomputable section
 open Classical
-
 
 namespace PartialOrder
 
